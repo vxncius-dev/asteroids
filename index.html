@@ -7,11 +7,36 @@
 </head>
 <body>
   <canvas></canvas>
-  <div id="commands">
-    <h1>Asteroids</h1>
-    <button id="start" onclick="jogo.iniciarJogo()">Press Space to Play</button>
-  </div>
-  <button id="pause" onclick="jogo.pausarJogo()"></button>
+<div id="commands">
+	<h1>Asteroids</h1>
+	<button id="start" onclick="jogo.iniciarJogo();">Press Space to Play</button>
+</div>
+<button id="pause" title="Pause">
+	<img src="" alt="" width="30">
+</button>
+<div id="pauseModal">
+	<button id="play">
+		<img src="" alt="Play" width="35" />
+		<p>Play</p>
+	</button>
+	<button id="exit" onclick="jogo.sair()">
+		<img src="" alt="Exit" width="35" />
+		<p>Exit</p>
+	</button>
+</div>
+<button id="controls" onclick="modalControls()" title="Controls">
+	<img src="" alt="ControlsButton" width="30" />
+</button>
+<div id="optionsControls">
+	<button id="mouse" onclick="jogo.controleMouse();modalControls()">
+		<img src="" alt="Mouse" width="35" />
+		<p>Mouse</p>
+	</button>
+	<button id="touch" onclick="jogo.controleTouch();modalControls()">
+		<img src="" alt="Touch" width="30" />
+		<p>Touch</p>
+	</button>
+</div>
   <script  src="./script.js"></script>
   <script>
     const icon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAzUlEQVR4nLXWsU2CQRyG8U+wkEYXsKCgdgSYwNqCyh1wAxagNGEDW1uGAFagM6GGhh+5BBNjJN7d9/2fAd4nubsnuab5A9w0keADd5GCxAoPkYLEFo+RgsQOT5GCxB7jSEHigJdIQeKEWaTgmwV6kQKtWpHPqqoVZWyLW1HOrqgVdeyzW1HPIasV7Tj920rF6PFy2enpzjHFoFawwRJveMYI/ayzzxC847ZoLFNwxGvr4SuCL0w6G/8lWGPY6fgPwSfuOx+/CNJT6+TrcgYPJQy2smAA7AAAAABJRU5ErkJggg==";
