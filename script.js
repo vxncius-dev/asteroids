@@ -3,6 +3,11 @@ const nave =
 const vel = 1;
 const commands = document.getElementById("commands");
 const pause_ = document.getElementById("pause");
+const play_ = document.getElementById("play");
+const controlsButton = document.getElementById("controls");
+const modal = document.getElementById("optionsControls");
+const pauseModal = document.getElementById("pauseModal");
+
 const gameState = (state_) => {
 	if (state_ === "start") {
 		commands.style.opacity = "0";
@@ -54,7 +59,12 @@ class JogoAsteroides {
 			y: 0
 		};
 		this.contadorPonto = 0;
-		this.controleNave();
+		window.innerWidth <= 766 ? this.controleTouch() : this.controleMouse();
+		this.pausarJogo = this.pausarJogo.bind(this);
+		this.continuarJogo = this.continuarJogo.bind(this);
+		this.sair();
+		pause_.addEventListener("click", this.pausarJogo);
+		play_.addEventListener("click", this.continuarJogo);
 		this.loop();
 	}
 
@@ -128,9 +138,10 @@ class JogoAsteroides {
 				return distancia < this.nave.size / 2;
 			});
 			if (colidiuNave && debugMode) {
-				alert("Você colidiu!");
+				alert("You Lose!");
 				this.pausarJogo();
 				gameState("pause");
+				pauseModal.style.display = "none";
 				return;
 			}
 			if (
@@ -249,7 +260,7 @@ class JogoAsteroides {
 		this.atualizarPontos();
 
 		if (this.estadoJogo === "jogando") {
-			this.atualizarAsteroides(false);
+			this.atualizarAsteroides(true);
 			const numeroAsteroides = this.asteroides.length;
 			const limiteAsteroides = 6;
 			if (numeroAsteroides < limiteAsteroides) {
@@ -276,87 +287,58 @@ class JogoAsteroides {
 		requestAnimationFrame(() => this.loop());
 	}
 
-	controleNave() {
-		if (window.innerWidth <= 766) {
-			let touchStartX = 0;
-			let touchStartY = 0;
+	controleMouse() {
+		this.canvas.addEventListener("mousemove", (event) => {
+			const mouseX = event.clientX - this.canvas.offsetLeft;
+			const mouseY = event.clientY - this.canvas.offsetTop;
+			this.nave.rotation =
+				(Math.atan2(mouseY - this.nave.y, mouseX - this.nave.x) * 180) / Math.PI;
+		});
 
-			this.canvas.addEventListener("touchstart", (event) => {
-				touchStartX = event.touches[0].clientX;
-				touchStartY = event.touches[0].clientY;
-			});
+		document.addEventListener("keydown", (event) => {
+			const speed = this.nave.speed;
+			const radianAngle = (this.nave.rotation * Math.PI) / 180;
 
-			this.canvas.addEventListener("touchmove", (event) => {
-				event.preventDefault();
-				const touchX = event.touches[0].clientX;
-				const touchY = event.touches[0].clientY;
-				const deltaX = touchX - touchStartX;
-				const deltaY = touchY - touchStartY;
-				const angle = Math.atan2(deltaY, deltaX);
-				this.nave.rotation = ((angle * 180) / Math.PI + 360) % 360;
-				this.nave.x += deltaX;
-				this.nave.y += deltaY;
-				touchStartX = touchX;
-				touchStartY = touchY;
-			});
+			switch (event.key) {
+				case "ArrowUp":
+				case "w":
+					this.nave.x += speed * Math.cos(radianAngle);
+					this.nave.y += speed * Math.sin(radianAngle);
+					break;
+				case "ArrowDown":
+				case "s":
+					this.nave.x -= speed * Math.cos(radianAngle);
+					this.nave.y -= speed * Math.sin(radianAngle);
+					break;
+				case "ArrowLeft":
+				case "a":
+					this.nave.rotation -= 10;
+					break;
+				case "ArrowRight":
+				case "d":
+					this.nave.rotation += 10;
+					break;
+			}
+			this.atualizarNave();
+		});
 
-			this.canvas.addEventListener("touchstart", () => {
-				if (this.contadorPonto % 10 === 0) this.criarPonto();
-				this.contadorPonto++;
-			});
-		} else {
-			this.canvas.addEventListener("mousemove", (event) => {
-				const mouseX = event.clientX - this.canvas.offsetLeft;
-				const mouseY = event.clientY - this.canvas.offsetTop;
-				this.nave.rotation =
-					(Math.atan2(mouseY - this.nave.y, mouseX - this.nave.x) * 180) / Math.PI;
-			});
+		this.canvas.addEventListener("mousemove", (event) => {
+			this.cursor.x = event.clientX - this.canvas.offsetLeft;
+			this.cursor.y = event.clientY - this.canvas.offsetTop;
+		});
 
-			document.addEventListener("keydown", (event) => {
-				const speed = this.nave.speed;
-				const radianAngle = (this.nave.rotation * Math.PI) / 180;
+		document.addEventListener("keydown", (event) => {
+			this.teclasPressionadas[event.key] = true;
+			if (event.code === "Space" && this.estadoJogo === "pausado") {
+				this.iniciarJogo();
+			} else if (event.code === "Space" && this.estadoJogo === "jogando") {
+				this.criarPonto();
+			}
+		});
 
-				switch (event.key) {
-					case "ArrowUp":
-					case "w":
-						this.nave.x += speed * Math.cos(radianAngle);
-						this.nave.y += speed * Math.sin(radianAngle);
-						break;
-					case "ArrowDown":
-					case "s":
-						this.nave.x -= speed * Math.cos(radianAngle);
-						this.nave.y -= speed * Math.sin(radianAngle);
-						break;
-					case "ArrowLeft":
-					case "a":
-						this.nave.rotation -= 10;
-						break;
-					case "ArrowRight":
-					case "d":
-						this.nave.rotation += 10;
-						break;
-				}
-				this.atualizarNave();
-			});
-
-			this.canvas.addEventListener("mousemove", (event) => {
-				this.cursor.x = event.clientX - this.canvas.offsetLeft;
-				this.cursor.y = event.clientY - this.canvas.offsetTop;
-			});
-
-			document.addEventListener("keydown", (event) => {
-				this.teclasPressionadas[event.key] = true;
-				if (event.code === "Space" && this.estadoJogo === "pausado") {
-					this.iniciarJogo();
-				} else if (event.code === "Space" && this.estadoJogo === "jogando") {
-					this.criarPonto();
-				}
-			});
-
-			document.addEventListener("keyup", (event) => {
-				this.teclasPressionadas[event.key] = false;
-			});
-		}
+		document.addEventListener("keyup", (event) => {
+			this.teclasPressionadas[event.key] = false;
+		});
 
 		document.addEventListener("mousedown", (e) => {
 			if (this.estadoJogo === "jogando") {
@@ -369,13 +351,67 @@ class JogoAsteroides {
 		});
 	}
 
+	controleTouch() {
+		let touchStartX = 0;
+		let touchStartY = 0;
+
+		this.canvas.addEventListener("touchstart", (event) => {
+			touchStartX = event.touches[0].clientX;
+			touchStartY = event.touches[0].clientY;
+		});
+
+		this.canvas.addEventListener("touchmove", (event) => {
+			event.preventDefault();
+			const touchX = event.touches[0].clientX;
+			const touchY = event.touches[0].clientY;
+			const deltaX = touchX - touchStartX;
+			const deltaY = touchY - touchStartY;
+			const angle = Math.atan2(deltaY, deltaX);
+			this.nave.rotation = ((angle * 180) / Math.PI + 360) % 360;
+			this.nave.x += deltaX;
+			this.nave.y += deltaY;
+			touchStartX = touchX;
+			touchStartY = touchY;
+		});
+
+		this.canvas.addEventListener("touchstart", () => {
+			if (this.contadorPonto % 10 === 0) this.criarPonto();
+			this.contadorPonto++;
+		});
+	}
+
 	iniciarJogo() {
+		if (pauseModal.style.display === "flex") pauseModal.style.display = "none";
 		gameState("start");
+		controlsButton.style.display = "none";
 		this.estadoJogo = "jogando";
 		this.loop();
 	}
 
 	pausarJogo() {
+		if (this.estadoJogo === "jogando") {
+			this.estadoJogo = "pausado";
+			this.atualizarAsteroides(false);
+			pauseModal.style.display = "flex";
+			pause_.style.display = "none";
+			setTimeout(() => {
+				pauseModal.style.opacity = "1";
+			}, 200);
+		}
+	}
+
+	continuarJogo() {
+		pause_.style.display = "block";
+		this.estadoJogo = "jogando";
+		jogo.atualizarAsteroides(true);
+		if (pauseModal.style.display === "flex") pauseModal.style.display = "none";
+	}
+
+	sair() {
+		pauseModal.style.opacity = "0";
+		setTimeout(() => {
+			pauseModal.style.display = "none";
+		}, 200);
 		gameState("pause");
 		this.estadoJogo = "pausado";
 	}
@@ -383,7 +419,52 @@ class JogoAsteroides {
 
 const jogo = new JogoAsteroides("canvas");
 
-// const body = document.body;
-// body.addEventListener("touchstart", () => (body.style.background = "red"));
-// body.addEventListener("touchmove", () => (body.style.background = "blue"));
-// body.addEventListener("touchend", () => (body.style.background = "green"));
+controlsButton.querySelector("img").src =
+	"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB50lEQVR4nO3WPWgUQRTA8UsipFHQQtugnaQxWJgYG+MHGFu1sra0sLEz8aPSRkvLiJVgF8uEQzBFjEmjEDBpJVYWQlAh+cmad/Fx7undeXeF+IeDuZ2Z999583Z2K5X/NAFOYjp+Y5VegDvY9pOiPd2LlW4naZaPdlN8W2O6t2o7e9qIqW6KxxqkegsnuiZOq64vrluVXoDRuIGprq+0BvpwOP3fbXcFHMA1vMNSur6E97iJQ50UHsdjbKZ9rRfX+IpnOFtkph3Z/ljd2waPTiNxpvksKF9du+I/ZwHnsZoGf8BTPMfnvxRnVgtXFr9MnR+xL/UNlwRYTv3LWqOaxWewnlJzFXtxEHdLJm/GC+NUE9uSWcdEfbr7cTkel06zFsW6p156DiPpBi5hpQPClYjVH7FHcCGLX8eZO1v7oogT6iIW2hAuxNy+9HKZDcduYRYdi3UT53A69U9gvgnhXN7DIkZcyyxm8XhRbX7lFSbTnRcVfi/GrsUhUY1rwylTkzG3nmrhKjtAxlNKMm+i8AZLT56duYMxphibKWK9KBWWBDkWp03xgs98wgxuhORKtGeiL7MVMX4UbUvgCB7hi+b5hic42pqtBAzhITZ+I9yIMUOVToOBqPDreID70S6qd6Djwsq/xHdlzM/fqvNlJQAAAABJRU5ErkJggg==";
+
+document.querySelector("#touch img").src =
+	"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAACbUlEQVR4nO2avWsUQRTAnx9EDNpLYkQQtBBTCgGxEQsJaKcxNmIlMUYQG60s/RfsBAsFGxuJwYiiiUlplS5Wflt5ajzzcT8Z962sY8zNxZvJ29UfHMe9N8O9H7M7Ozu7IqsE2AqMAA+B18C8frvf54EtYh1gAHjHyrwFjotVgCtAQ4t9CpwAuoAOoFslJzTv2l0Wa5AV6YpbAIaatB3Wdg1TI0N2TuSH01Bgn3Pa/o2Zc4bsxP5xOLXYLz/MhsUCZLORY8CL7wRGdbTuATu8/KD2eyAWIJtaHV1e/Ik3W/1SsE4AjldiAaCuBXV4cXf9KPLVy2/S+LxYAHihBXV78d/w8ts1/EEsAIxpQSdbFDll7Rw5owVNAutCRFw7YErDp8UCQCfwXosaCRS5oCE3o20WKwD9eqVeDBRZ1PZHxBrAJWApUGQJuChWAY4FihyVskCTWas08C+IAD3u+gF8BMb9dViZRMa81P1CbhfwGPgMPAP2rplEgEi+PsupL7OazplaM4kAkfyWOKdRyM15uZ+LSmCP3ka70ZpOMlp/IbKwQr9HXmqyrCKfvNS3sorU/5SzIuLoA/Y36Vc3IQIc0E+rHGwmmVqk7ch/kSYA64GzpR4Rsp2RW6kkYorcITESQeJQaolYIjepiMhsVUS+VEVkriois1URuV0VkcGqiHQGPJq2L+Jw26CJPWoSA2Aj8DyhyEwUEZXp0932FNyIJqIyVxOJ9McW2bDM1k27mS4+IYsps63w6Lrd1IDe6BIFmX0RZGrA4WQS3osBd9skMQHsTi7hCfUC13Tv9qV7gSCgcLfHOwNcdzduq/nj7+NY4KdxGT+/AAAAAElFTkSuQmCC";
+
+document.querySelector("#mouse img").src =
+	"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAACU0lEQVR4nO3by6tNYRjH8celI/dLOCZGciuUMpBQGMvIJcXglHNOxFAm/gF/ABkoM5cyESMZCTFFJAZyKWTAROicj1b7PXXoxN7b2du79lrfWrXa61K/73re1XrXenZETU2pwA6siiqCpRjBg6gi2KzB7agiOJ0EnImqgcX4iFFsjCqBhbiTrv6lqAKYiuU4htcp/BPMj14E03EYN/EOP/zK9aISohfBajz+LfBXPMdF7IxeRSP8pxT6KQ5hSVQBTMOjcSU+M6qExtUueIlZUTVwIwkYiiqCN0nAiqgi+JYEzIkqgu9JwOyoImoBqlEBWIZBXEiPurcwY1wFLEq/3Uz7HEF/lB3049wEz/UFs8YJWDLB9mLb2eItUJQRbMCrCYI1K2CMt9gUZQJr8fkPoVoRIJ1rTZQBjbH97C+BWhUwNlHqi9zBiSbCtCOg4FjkjsYcvlMCnkXOYGWTQdoVkPe8AXu6IGB35AoGuiBgIHIFw10QMBy5ohag1Qr4nKpgQVUrYCt2pfWeELAd55tcZow7rq+F47b/35Q1f50EDXZ4WRs9cg9ol6zvAcNtx6oFNE1dAZEr6iGgvgfoPPUQiFxRDwFDXRgC+fYSYF8XBOyNXMG2LgjYEpl/BB3tYPiR7D+a4mEHBdyP3MGpDgo4GbmDuXjfgfAfMC/KAI53QMDRKAuYgsuTGP5acc4oE5iNe5MQ/m5pu0g1egWKbu92udQT/cM4kPqBm+UF9kcvofHu/yCu4ssEoYuvRFfSPvl3gkzSn6DWY12x/s8nrKmpqYnW+QlLeKaD93YpeAAAAABJRU5ErkJggg==";
+
+document.querySelector("#play img").src =
+	"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAABFklEQVR4nO3ZsW3CQBjF8Q8hoIEuLU0GyAJswBCskAIGyAop06ZMmwW8AAzgmtYdjWXFf4TgpEgpUODu7HfcbwI/yfa9+z6zLMuy34ANMDZ1nJXA0hII4nwDz6aIv2rgHZiZeBBnD6yAgSngugJ4sQSCnPwAn8CT9RX/UwGvwNDEgzg7YGF9wu1a4AuYm3gQ5wC8ARP1IPSiHeBfN+2AMOK3A8KK1w6IowjeDoinAT6CtQPiq4K0A7qz89oO6FbrrR3kIPfbqr9alfrH3qTw+y3UD0T5ilJfSuM0eAAnQAj5Gl+qX6wO6lfdNoXhw1Z9HFSpD+iaoKeyD48wxN6rrxXq6KeyD6mt3soUlqFrYNT1c2RZ9uCOorLyFKJbgmwAAAAASUVORK5CYII=";
+
+document.querySelector("#exit img").src =
+	"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA+0lEQVR4nO3YsQ3CMBBGYUswBnPS0rIHFMhUNIwAA2SghyJRoBASUxzk7v6vTeN7seLIpYiIiEgLnChWcEIBrOCEAljBCQWwghMKYAUnFMAKTiiAFf7vAmyBW8YAu5d1rIBDpgAdsB6sZQ2csgTonUcijO6EqAGaI0QO0BQheoDZCBkCTEbIEoDnKfB2OmQKMLoTFhOgRIMCfG1TIuF711ARWKa62I/gD6Q+BuuHH6FjhgD10/D9w+gB6tTw0QPUueEjB6gtw0cN0OlKDPZzbz7yDhhei9+ZEDlAEwWwghMKYAUnFMAKTiiAFZxQACs4oQBWyB5ARESkhPIAzQjhA4ohO+YAAAAASUVORK5CYII=";
+
+document.querySelector("#pause img").src =
+	"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAVklEQVR4nO3SoRHAMBAEMfffdEK2gIBzkMQf/NyeAwA/ej66dT/jkVhkTVqR1pq0Iq01aUVaa9KKtNakFWmtSSvSWpNWpLUmrUhrTVqR1pq0Ii0AOPe8ZXiV98fYlvIAAAAASUVORK5CYII=";
+
+const modalControls = () => {
+	if (modal.style.display === "flex") {
+		modal.style.opacity = "0";
+		setTimeout(() => {
+			modal.style.display = "none";
+		}, 300);
+	} else {
+		modal.style.display = "flex";
+		setTimeout(() => {
+			modal.style.opacity = "1";
+		}, 200);
+	}
+};
+
+document.addEventListener("keydown", (event) => {
+	if (event.key === "Escape") {
+		modal.style.opacity = "0";
+		setTimeout(() => {
+			modal.style.display = "none";
+		}, 300);
+	}
+});
+
+document.addEventListener("keydown", (event) => {
+	if (event.key === "o") modalControls();
+});
+
+window.addEventListener("resize", function () {
+	const windowWidth = window.innerWidth;
+	controlsButton.style.display = windowWidth >= 766 ? "none" : "flex";
+});
