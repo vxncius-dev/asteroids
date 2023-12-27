@@ -6,12 +6,16 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-<canvas></canvas>
-<div id="commands">
-  <h1>Asteroids</h1>
-  <button id="start" onclick="jogo.iniciarJogo()">Press Space to Play</button>
-</div>
-<button id="pause" onclick="jogo.pausarJogo()"></button>
-<script  src="./script.js"></script>
+  <canvas></canvas>
+  <div id="commands">
+    <h1>Asteroids</h1>
+    <button id="start" onclick="jogo.iniciarJogo()">Press Space to Play</button>
+  </div>
+  <button id="pause" onclick="jogo.pausarJogo()"></button>
+  <script  src="./script.js"></script>
+  <script>
+    const icon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAzUlEQVR4nLXWsU2CQRyG8U+wkEYXsKCgdgSYwNqCyh1wAxagNGEDW1uGAFagM6GGhh+5BBNjJN7d9/2fAd4nubsnuab5A9w0keADd5GCxAoPkYLEFo+RgsQOT5GCxB7jSEHigJdIQeKEWaTgmwV6kQKtWpHPqqoVZWyLW1HOrqgVdeyzW1HPIasV7Tj920rF6PFy2enpzjHFoFawwRJveMYI/ayzzxC847ZoLFNwxGvr4SuCL0w6G/8lWGPY6fgPwSfuOx+/CNJT6+TrcgYPJQy2smAA7AAAAABJRU5ErkJggg==";
+    document.head.innerHTML += `<link rel="icon" type="image/x-icon" href="${icon}">`
+  </script>
 </body>
 </html>
