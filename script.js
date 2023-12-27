@@ -1,7 +1,3 @@
-//gameFont - https://www.cdnfonts.com/eight-bit-dragon.font
-//https://fontstruct.com/fontstructions/show/1534627/asteroids-display
-//https://imageio.forbes.com/specials-images/imageserve/618ed11bde61f1b9de93c0c6/The-space-themed-multidirectional-shooter-arcade-game--Asteroids--/960x0.jpg?format=jpg&width=1440
-
 const nave =
 	"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAA+klEQVR4nN3UsS4EURSA4RFisYVaIojEE9AoqDYShVfQUfIIlAqJeAWlTkg8ACWFjngAOhGNTaxPcydZ7OzMnZlt9q8n/5+cc+YmydCAHcwPMnCMDi6xPIjApt/cYqvOQBNt/7nDNkbriNzI5hn7aFQJHMrnJXw3XSawpjjvOMVMTGAcH+L4xBmWikaulaMTTnwlL3CgGt+4wnpW4KJioI1zrPaSN0rsIOUVR5jtN54N8dxjFxNFFnxSUPoVFtrKlf4JPOWI38Ltz0WJg3yxj/gxPBNT0eKuwF7GXbcwUlrc4wdLn4CFytIu+SQewhiatYlTMFbLGJJh5AfYJTFYlvD1YQAAAABJRU5ErkJggg==";
 const vel = 1;
@@ -292,23 +288,14 @@ class JogoAsteroides {
 
 			this.canvas.addEventListener("touchmove", (event) => {
 				event.preventDefault();
-
 				const touchX = event.touches[0].clientX;
 				const touchY = event.touches[0].clientY;
-
 				const deltaX = touchX - touchStartX;
 				const deltaY = touchY - touchStartY;
-
-				// Calcular o ângulo entre a posição atual e a posição anterior do toque
 				const angle = Math.atan2(deltaY, deltaX);
-
-				// Converter o ângulo para graus e ajustar para o intervalo de 0 a 360
 				this.nave.rotation = ((angle * 180) / Math.PI + 360) % 360;
-
-				// Atualiza a posição da nave com base no movimento
 				this.nave.x += deltaX;
 				this.nave.y += deltaY;
-
 				touchStartX = touchX;
 				touchStartY = touchY;
 			});
