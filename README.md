@@ -1,4 +1,4 @@
-# <p align="center"><a href="https://viuh9997.github.io/asteroids/">Asteroids</a></p>
+# <p align="center"><a href="https://vxncius-dev.github.io/asteroids/">Asteroids</a></p>
 
 <p align="center">Tentei recriar o jogo classico  <a href="https://en.wikipedia.org/wiki/Asteroids_(video_game)">Asteroids</a> do Atari em JavaScript, e acho que ficou muito legal haha</p>
 
